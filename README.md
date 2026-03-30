@@ -13,3 +13,15 @@ UI组件库安装：antd
 ![](assets/17744257131719.jpg)
 在dependencies中看到下方内容即安装完成
 ![](assets/17744257691857.jpg)
+模拟后端接口：mockjs
+优点：调用方式与真实的后端接口完全相同，是纯前端项目的好搭子
+安装：
+![](assets/17747035539170.jpg)
+前后端交流的工具：Axios
+Axios是一个基于Promise封装的http库，可以用于浏览器和node.js中，其实就是通过Promise实现对Ajax技术的一种封装
+![](assets/17747036339669.jpg)
+### 2.login页面
+
+
+接口请求数据检查
+![](assets/17747957807672.jpg)
