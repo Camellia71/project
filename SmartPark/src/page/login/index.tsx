@@ -9,20 +9,30 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { login } from '../../api/users';
 import {setToken} from '../../store/login/authSlice'
 import {useDispatch} from 'react-redux'
+import {useNavigate} from 'react-router-dom'
+import {useState} from 'react'
 function Login() {
   const [form] = Form.useForm();
+  const [loading,setLoading]=useState<boolean>(false)
   const dispatch=useDispatch()
+  const navigate=useNavigate()
   const handleLogin = () => {
     form
       .validateFields()
       .then(async res => {
+        setLoading(true)
+        // 登录请求
         const response = await login(res);  
+        setLoading(false)
         //加一个类型断言，因为login返回的是一个Promise对象，而Promise对象没有data属性，所以要加一个类型断言，
         // 把Promise对象转换为一个对象，对象有data属性，data属性是一个对象，对象有token属性，token属性是一个字符串
         const token = (response as { data: { token: string } }).data.token;
         dispatch(setToken(token))
+        navigate('/',{replace:true})  //跳转到首页,
+        // 加一个参数replace:true，就不能直接点返回就回到首页了(本质是修改浏览器历史记录，而不是添加新的历史记录)
       })
       .catch(err => {
+        setLoading(false)
         console.log(err);
       });
   };
@@ -64,6 +74,7 @@ function Login() {
                 type="primary"
                 style={{ width: '100%' }}
                 onClick={handleLogin}
+                loading={loading}
               >
                 登录
               </Button>

@@ -1,5 +1,7 @@
 import Mock from 'mockjs';
-
+Mock.setup({
+  timeout: '200-600',
+});
 Mock.mock('https://www.demo.com/login', 'post', options => {
   const { username, password } = JSON.parse(options.body);
   console.log(username, password);
