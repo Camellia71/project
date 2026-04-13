@@ -3,16 +3,14 @@ import { message } from 'antd';
 import { store } from '../../store';
 
 const http = axios.create({
-  baseURL: 'https://www.demo.com',
+  baseURL: import.meta.env.VITE_API_URL,
   timeout: 5000,
 });
 
 //请求拦截器
 http.interceptors.request.use(config => {
   //在请求头中添加token
-  const { token } = store.getState().auth;
-  //根据 store/index.ts 的配置,store 中的 reducer 名称是 auth ,不是 authSlice 。
-  // 实际上在 Redux Toolkit 中, configureStore 会自动将 reducer 名称作为 state 的属性名,所以应该使用 auth 。
+  const { token } = store.getState().authSlice;
   if (token) {
     //Authorization: 专门用来携带认证信息的字段
     //Bearer表示的是一种认证类型，表示后面携带的是一个token（令牌）
