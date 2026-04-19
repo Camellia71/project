@@ -16,6 +16,7 @@ const items: MenuProps['items'] = [
         </a>
       ),
       icon: <UserOutlined />,
+      //引入图标
     },
     {
       key: '2',
@@ -26,9 +27,9 @@ const items: MenuProps['items'] = [
       ),
       icon: <PoweroffOutlined />,
     },
-    
-  ];
-function MyHeader() {
+];
+
+const MyHeader = () => {
     const dispatch=useDispatch()
     const navigate=useNavigate()
     const onClick:MenuProps['onClick']=({key})=>{
@@ -47,11 +48,11 @@ function MyHeader() {
             <a onClick={(e) => e.preventDefault()}>
                 <Space>
                    欢迎您,{sessionStorage.getItem("username")}
-                    <DownOutlined />
+                    <DownOutlined /> 
                 </Space>
             </a>
         </Dropdown>
     </div>
 }
 
-export default MyHeader
+export default MyHeader;

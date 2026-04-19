@@ -9,6 +9,7 @@ const { Header, Content, Footer, Sider } = Layout;
 
 function Home() {
   const [collapsed, setCollapsed] = useState<boolean>(false);
+  const { token } = theme.useToken();
   return (
     <div className='home'>
       <Layout style={{ minHeight: '100vh' }}>
@@ -16,19 +17,12 @@ function Home() {
         <NavLeft/>
       </Sider>
       <Layout>
-        <Header style={{ paddingRight:"20px", background: colorBgContainer,textAlign:"right" }} >
+        <Header style={{ paddingRight:"20px", background: token.colorBgContainer,textAlign:"right" }} >
           <MyHeader/>
         </Header>
          <Content style={{ margin: '0 16px',height:"90vh",overflowY:"auto",overflowX:"hidden" }}>
           <MyBreadcrumb/>
-          <div
-            style={{
-              padding: 24,
-              minHeight: 360,
-            }}
-          >
-            Bill is a cat.
-          </div>
+          <Outlet />
         </Content>
         <Footer style={{ textAlign: 'center' }}>
           Ant Design ©{new Date().getFullYear()} Created by Ant UED

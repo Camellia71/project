@@ -12,9 +12,8 @@ interface Iprops {
   children: React.ReactNode;
 }
 function RequireAuth({ allowed, redirectTo, children }: Iprops) {
-  //此时这里需要两个参数，allowed用于判断是否需要登录，token用于判断是否能够登录
   const navigate = useNavigate();
-  const token = useSelector((state: { auth: { token: string | null } }) => state.auth.token);
+  const token = useSelector((state: { authSlice: { token: string | null } }) => state.authSlice.token);
   const isLogin = token ? true : false;
 
   //allowed表示当前路由是否需要登录，isLogin表示用户是否登录

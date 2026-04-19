@@ -3,7 +3,7 @@ import { message } from 'antd';
 import { store } from '../../store';
 
 const http = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL || 'https://www.demo.com',
   timeout: 5000,
 });
 
