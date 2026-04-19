@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        const btn = document.querySelector("#send")
+        const sendFetch=() =>{
+            //第一个参数是url，默认请求方式get，返回值是Promise对象
+            //发送一个post请求
+            // fetch('http://localhost:3000/api/txt').then(res=>{
+            //     console.log(res)
+            //     //指定返回的方式，默认是json
+            //     return res.text()
+            // }).then(data=>{
+            //     console.log(data)
+            // })
+            fetch('http://localhost:3000/api/post',{
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json'
+                },
+                body:JSON.stringify({
+                    name:'zhangsan',
+                    age:18
+                })
+            }).then(res=>{
+                console.log(res)
+                //指定返回的方式，默认是json
+                return res.json()
+            }).then(data=>{
+                console.log(data)
+            })
+        }
+    </script>
+</body>
+</html>
