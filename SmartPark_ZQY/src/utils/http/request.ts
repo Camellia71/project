@@ -2,7 +2,7 @@
  * SmartPark - HTTP请求方法封装
  */
 
-import http from './http';
+import http, { cachedGet, debouncedRequest, clearCache, clearPendingRequest, clearDebounceTimers } from './http';
 
 export interface ApiResponse<T = unknown> {
   code: number;
@@ -47,3 +47,7 @@ export function upload<T = unknown>(
     },
   });
 }
+
+// ==================== 增强方法导出 ====================
+
+export { cachedGet, debouncedRequest, clearCache, clearPendingRequest, clearDebounceTimers };
