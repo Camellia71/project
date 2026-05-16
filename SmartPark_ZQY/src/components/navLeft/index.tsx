@@ -1,6 +1,6 @@
 import { Menu } from 'antd';
 import type { MenuProps } from 'antd';
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import logo from "../../assets/logo.png"
 import icons from './iconList';
 import { useNavigate,useLocation } from 'react-router-dom';
@@ -26,28 +26,23 @@ function NavLeft() {
     const[menuData,setMenuData]=useState<MenuItem[]>([]);
     const location=useLocation();
 
-    useEffect(()=>{
-        configMenu()
-    },[menuList]);
-
-    async function configMenu(){
-        const mappedMenuItems:MenuItem[]=mapMenuItems(menuList);
+    useEffect(() => {
+        function mapMenuItems(items: MenuItemFromData[]): MenuItem[] {
+            return items.map((item:MenuItemFromData)=>{
+                const mappedItem: MenuItem = {
+                    key: item.key,
+                    label: item.label,
+                    icon: icons[item.icon as keyof typeof icons] as React.ReactNode,
+                };
+                if (item.children && item.children.length > 0) {
+                    mappedItem.children = mapMenuItems(item.children);
+                }
+                return mappedItem;
+            });
+        }
+        const mappedMenuItems:MenuItem[] = mapMenuItems(menuList);
         setMenuData(mappedMenuItems);
-    }
-
-    function mapMenuItems(items:MenuItemFromData[]):MenuItem[]{
-        return items.map((item:MenuItemFromData)=>{
-            const mappedItem: MenuItem = {
-                key: item.key,
-                label: item.label,
-                icon: icons[item.icon as keyof typeof icons] as React.ReactNode,
-            };
-            if (item.children && item.children.length > 0) {
-                mappedItem.children = mapMenuItems(item.children);
-            }
-            return mappedItem;
-        })
-    }
+    }, [menuList]);
 
     function handleClick({key}:{key:string}){
         navigate(key)

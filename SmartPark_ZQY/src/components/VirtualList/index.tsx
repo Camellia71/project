@@ -1,3 +1,5 @@
+//这是一个虚拟滚动列表组件，用于高效渲染大量数据，避免内存泄漏
+//虚拟滚动的本质：只渲染可视区域内的元素，而不是渲染全部数据。比如有 10000 条数据，屏幕上只能看到 10 条，那就只渲染这 10 条 DOM 节点。
 import React, { useEffect, useRef, useState, useCallback, useMemo, CSSProperties } from 'react';
 import './index.scss';
 

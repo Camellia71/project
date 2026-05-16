@@ -3,15 +3,17 @@ import type { TableProps } from 'antd';
 import { getAccountList } from "../../api/users";
 import useDataList from "../../hooks/useDataList";
 import type { TreeDataNode, TreeProps } from 'antd';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSelector } from "react-redux";
-import withPermissions from "../../utils/withPermissions";
-interface MenuType{
-    label:string;
-    icon:string;
-    key:string;
-    children?:MenuType[]
+import type { RootState } from "../../store";
+
+interface MenuType {
+    label: string;
+    icon: string;
+    key: string;
+    children?: MenuType[];
 }
+
 interface DataType {
     id: number;
     accountName: string;
@@ -19,9 +21,11 @@ interface DataType {
     person: string;
     tel: string;
     department: string;
+    menu?: MenuType[];
 }
+
 interface SearchType {
-    accountName: string
+    accountName: string;
 }
 
 const treeData: TreeDataNode[] = [
@@ -53,7 +57,6 @@ const treeData: TreeDataNode[] = [
                 title: "车辆信息",
                 key: "/estate/car"
             }
-
         ]
     },
     {
@@ -118,35 +121,53 @@ const treeData: TreeDataNode[] = [
     },
 ];
 
-function extractTreeKeys(data:any){
-    let keys:string[]=[];
-    data.forEach((item:any)=>{
-        if(item.children&&item.children.length>0){
-            const childKeys:string[]=extractTreeKeys(item.children);
-            keys=keys.concat(childKeys)
-        }else{
+interface TreeNode {
+    key: string;
+    children?: TreeNode[];
+}
+
+function extractTreeKeys(data: TreeNode[]): string[] {
+    let keys: string[] = [];
+    data.forEach((item) => {
+        if (item.children && item.children.length > 0) {
+            const childKeys: string[] = extractTreeKeys(item.children);
+            keys = keys.concat(childKeys)
+        } else {
             keys.push(item.key)
         }
     })
     return keys
 }
 
-
-
 function Settings() {
-    const AuthButton:React.FC<any>=withPermissions(['delete'],JSON.parse(sessionStorage.getItem("btnAuth") as string))(Button)
+    const btnAuthList = JSON.parse(sessionStorage.getItem("btnAuth") as string) as string[];
+    const hasDeletePermission = ['delete'].every(item => btnAuthList.includes(item));
 
-    const edit=(menu:MenuType[],accountName:string)=>{
-            setAccountName(accountName);
-           const newCheckedKeys=extractTreeKeys(menu) 
-            setCheckedKeys(newCheckedKeys)
-    }
+    const [accountName, setAccountName] = useState<string>("当前用户");
+    const { menuList } = useSelector((state: RootState) => (state as unknown as Record<string, unknown>).authSlice as { menuList: TreeNode[] });
+    const [checkedKeys, setCheckedKeys] = useState<React.Key[]>(() => extractTreeKeys(menuList));
 
-    const columns= [
+    const { dataList, page, pageSize, total, loading, formData, setFormData, onChange } = useDataList<DataType, SearchType>({ accountName: "" }, getAccountList);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
+
+    const edit = (menu: MenuType[], accountName: string) => {
+        setAccountName(accountName);
+        const newCheckedKeys = extractTreeKeys(menu);
+        setCheckedKeys(newCheckedKeys);
+    };
+
+    const columns: TableProps<DataType>['columns'] = [
         {
             title: "No.",
             key: "index",
-            render: (text: any, record: any, index: any) => index + 1,
+            render: (_text, _record, index) => index + 1,
         },
         {
             title: "账号名称",
@@ -176,95 +197,88 @@ function Settings() {
         {
             title: "操作",
             key: "operate",
-            render(value:string, record:any) {
-                return <>
-                    <Button size="small" type="primary" className="mr" onClick={()=>edit(record.menu,record.accountName)}>修改权限</Button>
-                    <Popconfirm
-                        title="操作提示"
-                        description="确认要删除当前账号吗？"
-                        okText="是"
-                        cancelText="否"
-                    >
-                        <AuthButton size="small" type="primary" danger>删除账号</AuthButton>
-                        {/* <Button size="small" type="primary" danger>删除账号</Button> */}
-                    </Popconfirm>
-
-                </>
+            render(value: string, record: DataType) {
+                return (
+                    <>
+                        <Button size="small" type="primary" className="mr" onClick={() => edit(record.menu || [], record.accountName)}>修改权限</Button>
+                        <Popconfirm
+                            title="操作提示"
+                            description="确认要删除当前账号吗？"
+                            okText="是"
+                            cancelText="否"
+                        >
+                        {hasDeletePermission && (
+                            <Button size="small" type="primary" danger onClick={() => {}}>删除账号</Button>
+                        )}
+                        </Popconfirm>
+                    </>
+                )
             }
         }
-    ]
-    const [accountName,setAccountName]=useState<string>("当前用户")
-    const {menuList}=useSelector((state:any)=>state.authSlice)
-    const [checkedKeys,setCheckedKeys]=useState<React.Key[]>([])
-    const { dataList, page, pageSize, total, loading, formData, setDataList, setPage, setPageSize, setTotal, setLoading, setFormData, loadData, onChange, handleChange, reset } = useDataList<SearchType, DataType>({ accountName: "" }, getAccountList)
-   
-    useEffect(()=>{
-        setCheckedKeys(extractTreeKeys(menuList))
-    },[])
-   
-    const handle=()=>{
-        console.log(checkedKeys,accountName)
-    }
-   const onCheck:TreeProps['onCheck']=(checkedKeys)=>{
-    setCheckedKeys(checkedKeys as React.Key[])
-   }
-   return <div>
-        <Card>
-            <Row gutter={16}>
+    ];
+
+    const handle = () => {
+        console.log(checkedKeys, accountName);
+    };
+
+    const onCheck: TreeProps['onCheck'] = (checkedKeys) => {
+        setCheckedKeys(checkedKeys as React.Key[]);
+    };
+
+    return (
+        <div>
+            <Card>
+                <Row gutter={16}>
+                    <Col span={8}>
+                        <Input name="accountName" value={formData.accountName} placeholder="请输入账户名" onChange={handleChange} />
+                    </Col>
+                    <Col span={8}>
+                        <Button type="primary"> 搜索</Button>
+                    </Col>
+                    <Col span={8} className="tr">
+                        <Button type="primary">新建账号</Button>
+                    </Col>
+                </Row>
+            </Card>
+
+            <Row gutter={16} className="mt">
                 <Col span={8}>
-                    <Input name="accountName" value={formData.accountName} placeholder="请输入账户名" onChange={handleChange} />
+                    <Card title={accountName + ":所拥权限"}>
+                        <Tree
+                            checkable
+                            treeData={treeData}
+                            checkedKeys={checkedKeys}
+                            onCheck={onCheck}
+                        />
+                    </Card>
+                    <Card className="mt">
+                        <Popconfirm
+                            title="操作提示"
+                            description={`您确认要修改${accountName}用户的权限吗？}`}
+                            okText="是"
+                            cancelText="否"
+                            onConfirm={handle}
+                        >
+                            <Button type="primary">提交修改</Button>
+                        </Popconfirm>
+                    </Card>
                 </Col>
-                <Col span={8}>
-                    <Button type="primary"> 搜索</Button>
-                </Col>
-                <Col span={8} className="tr">
-                    <Button type="primary">新建账号</Button>
+
+                <Col span={16}>
+                    <Card>
+                        <Table
+                            loading={loading}
+                            columns={columns}
+                            dataSource={dataList}
+                            rowKey={record => record.id}
+                            pagination={false}
+                        />
+                        <Pagination className="fr mr" showQuickJumper total={total} current={page} pageSize={pageSize} onChange={onChange} />
+                    </Card>
                 </Col>
             </Row>
-
-        </Card>
-
-        <Row gutter={16} className="mt">
-            <Col span={8} >
-                <Card title={accountName+":所拥权限"}>
-                    <Tree
-                        checkable
-                        treeData={treeData}
-                        checkedKeys={checkedKeys}
-                        onCheck={onCheck}
-                    />
-                </Card>
-                <Card className="mt">
-                    <Popconfirm
-                        title="操作提示"
-                        description={`您确认要修改${accountName}用户的权限吗？}`}
-                        okText="是"
-                        cancelText="否"
-                        onConfirm={handle}
-                    >
-                        <Button type="primary">提交修改</Button>
-                    </Popconfirm> 
-                </Card>
-            </Col>
-
-            <Col span={16}>
-                <Card>
-                    <Table
-                        loading={loading}
-                        columns={columns}
-                        dataSource={dataList}
-                        rowKey={record => record.id}
-                        pagination={false}
-                    />
-                    <Pagination className="fr mr" showQuickJumper total={total} current={page} pageSize={pageSize} onChange={onChange} />
-                </Card>
-
-            </Col>
-        </Row>
-
-    </div>
+        </div>
+    )
 }
-
-
 
 export default Settings

@@ -1,70 +1,119 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface DataFetcher<T> {
   (args: T & { page: number; pageSize: number }): Promise<any>;
 }
 
-function useDataList<T extends object, U>(
-  initialFormData: T,
-  fetchData: DataFetcher<T>
-) {
-  const [dataList, setDataList] = useState<U[]>([]);
+interface ResponseParser<T> {
+  (response: any): { list: T[]; total: number };
+}
+
+interface UseDataListOptions<T> {
+  responseParser?: ResponseParser<T>;
+  queryKey?: string;
+  staleTime?: number;
+  gcTime?: number;
+}
+
+export interface UseDataListResult<T, F> {
+  dataList: T[];
+  page: number;
+  pageSize: number;
+  total: number;
+  loading: boolean;
+  error: unknown;
+  formData: F;
+  setFormData: React.Dispatch<React.SetStateAction<F>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+  setPageSize: React.Dispatch<React.SetStateAction<number>>;
+  refetch: () => void;
+  invalidate: () => void;
+  reset: () => void;
+  onChange: (page: number, pageSize?: number) => void;
+}
+
+function useDataList<T extends object, F extends object>(
+  initialFormData: F,
+  fetchData: DataFetcher<F>,
+  options: UseDataListOptions<T> = {}
+): UseDataListResult<T, F> {
+  const {
+    responseParser,
+    queryKey: customQueryKey,
+    staleTime = 30000,
+    gcTime = 5 * 60 * 1000,
+  } = options;
+
+  const queryClient = useQueryClient();
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
-  const [total, setTotal] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [formData, setFormData] = useState<T>(initialFormData);
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetchData({ page, pageSize, ...formData as any }) as any;
-      const list = res?.data?.list || [];
-      const total = res?.data?.total || 0;
-      setDataList(list);
-      setTotal(total);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  }, [formData, page, pageSize, fetchData]);
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const [formData, setFormData] = useState<F>(initialFormData);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value,
-    }) as T);
+  const defaultParser = (response: any): { list: T[]; total: number } => {
+    const res = response?.data || response;
+    return {
+      list: res?.list || [],
+      total: res?.total || 0,
+    };
   };
-  const onChange = (page: number, pageSize: number) => {
-    setPage(page);
-    setPageSize(pageSize);
-  };
-  const reset = () => {
+
+  const parseResponse = useMemo(() => responseParser || defaultParser, [responseParser]);
+
+  const baseQueryKey = useMemo(() => customQueryKey || fetchData.name || 'dataList', [customQueryKey, fetchData.name]);
+  
+  const queryKey = [baseQueryKey, page, pageSize, formData] as const;
+
+  const {
+    data: parsedData,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey,
+    queryFn: async () => {
+      const response = await fetchData({ page, pageSize, ...formData as any });
+      return parseResponse(response);
+    },
+    staleTime,
+    gcTime,
+  });
+
+  const dataList = parsedData?.list || [];
+  const total = parsedData?.total || 0;
+
+  const invalidate = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: [baseQueryKey] });
+  }, [queryClient, baseQueryKey]);
+
+  const onChange = useCallback((newPage: number, newPageSize?: number) => {
+    setPage(newPage);
+    if (newPageSize !== undefined) {
+      setPageSize(newPageSize);
+    }
+  }, []);
+
+  const reset = useCallback(() => {
     setPage(1);
     setPageSize(10);
     setFormData(initialFormData);
-  };
+  }, [initialFormData]);
+
   return {
     dataList,
     page,
     pageSize,
     total,
-    loading,
+    loading: isLoading,
+    error,
     formData,
-    setDataList,
+    setFormData,
     setPage,
     setPageSize,
-    setTotal,
-    setLoading,
-    setFormData,
-    loadData,
-    onChange,
-    handleChange,
+    refetch,
+    invalidate,
     reset,
+    onChange,
   };
 }
 

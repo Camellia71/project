@@ -1,6 +1,5 @@
 import { Card } from "antd"
-import { Descriptions, Row, Col, Calendar, Avatar, List,Tag,Progress,Badge } from 'antd';
-import type { DescriptionsProps } from 'antd';
+import { Row, Col, Calendar, Avatar, List,Tag,Progress,Badge } from 'antd';
 const data = [
     {
         title: 'Ant Design Title 1',
@@ -20,7 +19,7 @@ export default function Personal() {
                     <List
                         itemLayout="horizontal"
                         dataSource={data}
-                        renderItem={(item, index) => (
+                        renderItem={() => (
                             <List.Item>
                                 <List.Item.Meta
                                     avatar={<Avatar src={`https://randomuser.me/api/portraits/thumb/men/52.jpg`} />}

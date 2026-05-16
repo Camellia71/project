@@ -65,7 +65,7 @@ const columns:TableProps<DataType>['columns']=[
     {
         title:"操作",
         key:"operate",
-        render(value){
+        render(){
             return <>
                 <Button type="primary" className="mr">编辑</Button>
                 <Button type="primary" danger>删除</Button>

@@ -1,14 +1,16 @@
-import {Card,Table,Row,Col,Input,Button,Pagination,Tag} from "antd" 
+import { Card, Table, Row, Col, Input, Button, Pagination, Tag } from "antd"
 import { TableProps } from "antd";
 import useDataList from "../../hooks/useDataList";
 import { getEquipmentList } from "../../api/equipment";
-interface SearchType{
-    name:string;
-    person:string;
+
+interface SearchType {
+    name: string;
+    person: string;
 }
+
 interface DataType {
-    id:number
-    no: string,
+    id: number;
+    no: string;
     name: string;
     person: string;
     tel: number;
@@ -17,9 +19,10 @@ interface DataType {
     status: string;
     last: string;
     type: string;
-    from: string
+    from: string;
 }
-const columns:TableProps<DataType>["columns"]= [
+
+const columns: TableProps<DataType>["columns"] = [
     {
         title: "No.",
         key: "index",
@@ -94,56 +97,58 @@ const columns:TableProps<DataType>["columns"]= [
     },
 ]
 
+function Equipment() {
+    const {
+        dataList,
+        page,
+        pageSize,
+        total,
+        loading,
+        formData,
+        setFormData,
+        refetch,
+        onChange,
+        reset,
+    } = useDataList<DataType, SearchType>({ name: "", person: "" }, getEquipmentList);
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
 
-function Equipment(){
- const {
-    dataList,
-    page,
-    pageSize,
-    total,
-    loading,
-    formData,
-    setDataList,
-    setPage,
-    setPageSize,
-    setTotal,
-    setLoading,
-    setFormData,
-    loadData,
-    onChange,
-    handleChange,
-    reset
-} =useDataList<SearchType,DataType>({name:"",person:""},getEquipmentList)
-
-    return <div>
-        <Card className="search">
-            <Row gutter={16}>
-                <Col span={7}>
-                    <p>设备名称：</p>
-                    <Input value={formData.name} name="name" placeholder="请输入设备名称或编号" onChange={handleChange}/>
-                </Col>
-                <Col span={7}>
-                    <p>负责人：</p>
-                    <Input value={formData.person} name="person" placeholder="请输入负责人姓名" onChange={handleChange}/>
-                </Col>
-                <Col span={3}>
-                    <Button type="primary" className="mr" onClick={loadData}>查询</Button>
-                    <Button onClick={reset}>重置</Button>
-                </Col>
-            </Row>
-        </Card> 
-        <Card className="mt">
-            <Table
-                columns={columns}
-                dataSource={dataList}
-                loading={loading}
-                rowKey={(record)=>record.id}
-                pagination={false}
-            />
-            <Pagination className="fr mt" showQuickJumper defaultCurrent={1} total={total} onChange={onChange} current={page} pageSize={pageSize}/>
-        </Card>
-    </div>
+    return (
+        <div>
+            <Card className="search">
+                <Row gutter={16}>
+                    <Col span={7}>
+                        <p>设备名称：</p>
+                        <Input value={formData.name} name="name" placeholder="请输入设备名称或编号" onChange={handleChange} />
+                    </Col>
+                    <Col span={7}>
+                        <p>负责人：</p>
+                        <Input value={formData.person} name="person" placeholder="请输入负责人姓名" onChange={handleChange} />
+                    </Col>
+                    <Col span={3}>
+                        <Button type="primary" className="mr" onClick={refetch}>查询</Button>
+                        <Button onClick={reset}>重置</Button>
+                    </Col>
+                </Row>
+            </Card>
+            <Card className="mt">
+                <Table
+                    columns={columns}
+                    dataSource={dataList}
+                    loading={loading}
+                    rowKey={(record) => record.id}
+                    pagination={false}
+                />
+                <Pagination className="fr mt" showQuickJumper defaultCurrent={1} total={total} onChange={onChange} current={page} pageSize={pageSize} />
+            </Card>
+        </div>
+    )
 }
 
 export default Equipment

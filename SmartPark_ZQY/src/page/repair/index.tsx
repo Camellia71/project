@@ -47,7 +47,7 @@ const columns: TableProps<DataType>['columns'] = [
         title: '维修状态',
         dataIndex: 'status',
         key: 'status',
-        render:(text,record)=>{
+        render:(text)=>{
             if(text==1){
                 return  <Tag color="#f50">待维修</Tag>
             }else if(text==2){

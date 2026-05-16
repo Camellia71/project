@@ -1,11 +1,11 @@
 import {Card,Table,Row,Col,Input,Button, Tag,Pagination} from "antd"
 import { useEffect, useState } from "react"
-import { TableProps } from "antd";
+import { TableProps, PaginationProps } from "antd";
 import { getContractList } from "../../api/contract";
 import { setData,setTotal,setCurrent,setFormList,setSize } from "../../store/finance/contractSlice";
 import { useDispatch,useSelector } from "react-redux";
-import { PaginationProps } from "antd";
 import { useNavigate,useSearchParams } from "react-router-dom";
+import type { RootState } from "../../store";
 
 interface SearchType{
     contractNo:string;
@@ -24,8 +24,17 @@ interface DataType{
     yi:string;
     status:string
 }
+
+interface ContractSliceState {
+    data: DataType[];
+    total: number;
+    formList: SearchType;
+    size: number;
+    current: number;
+}
+
 function Dashboard(){
-    const {data,total,formList,size,current}=useSelector((state:any)=>state.contractSlice)
+    const {data, total, formList, size, current} = useSelector((state: RootState) => state.contractSlice as unknown as ContractSliceState);
     const [formData,setFormData]=useState<SearchType>({
         contractNo:"",
         person:"",
@@ -61,11 +70,16 @@ function Dashboard(){
 
     const loadData=async(page:number,pageSize:number)=>{
        setLoading(true)
-       const res = await getContractList({...formData,page,pageSize}) as any;
-       const {list=[], total=0} = res?.data || {};
-       setLoading(false)
-       dispatch(setData(list))
-       dispatch(setTotal(total))
+       try {
+           const res = await getContractList({...formData,page,pageSize}) as Record<string, unknown>;
+           const data = res?.data as Record<string, unknown> | undefined;
+           const list = (data?.list as DataType[]) || [];
+           const total = (data?.total as number) || 0;
+           dispatch(setData(list))
+           dispatch(setTotal(total))
+       } finally {
+           setLoading(false)
+       }
     }
     const detail=(contractNo:string)=>{
         navigate("/finance/surrender?contractNo="+contractNo)
@@ -78,21 +92,26 @@ function Dashboard(){
     }
 
     useEffect(()=>{
-        if( !isReturn || !data.length){
-            loadData(page,pageSize)
+        let cancelled = false;
+        const init = async () => {
+            if( !isReturn || !data.length){
+                await loadData(page,pageSize)
+            }
+            if(isReturn && !cancelled){
+                setFormData(formList);
+                setPage(current)
+                setPageSize(size)
+            }
         }
-        if(isReturn){
-            setFormData(formList);
-            setPage(current)
-            setPageSize(size)
-        }
-    },[])
+        void init();
+        return () => { cancelled = true; }
+    }, [])
 
     const columns:TableProps<DataType>["columns"]=[
         {
             title:"No.",
             key:"index",
-            render(value,record,index){
+            render(_value,_record,index){
                 return index+1
             }
         },
@@ -135,10 +154,10 @@ function Dashboard(){
             title:"审批状态",
             dataIndex:"status",
             key:"status",
-            render(value){
-                if(value==1){
+            render(statusValue){
+                if(statusValue==1){
                   return  <Tag>未审批</Tag>
-                }else if(value==2){
+                }else if(statusValue==2){
                     return <Tag color="green">审批通过</Tag>
                 }else{
                     return <Tag color="red">审批拒绝</Tag>
@@ -148,7 +167,7 @@ function Dashboard(){
         {
             title:"操作",
             key:"operate",
-            render(value,record){
+            render(_value,record){
                 return <Button type="primary" size="small" onClick={()=>detail(record.contractNo)}>合同详情</Button>
             }
         },
