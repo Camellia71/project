@@ -1,0 +1,13 @@
+{
+  "pages": {
+    "/_app": []
+  },
+  "devFiles": [],
+  "polyfillFiles": [],
+  "lowPriorityFiles": [
+    "static/jiCli61b5WBLDHdK4k8jn/_buildManifest.js",
+    "static/jiCli61b5WBLDHdK4k8jn/_ssgManifest.js",
+    "static/jiCli61b5WBLDHdK4k8jn/_clientMiddlewareManifest.js"
+  ],
+  "rootMainFiles": []
+}

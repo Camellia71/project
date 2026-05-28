@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[22016,["/_next/static/chunks/12jj9s16fumam.js","/_next/static/chunks/0d3shmwh5_nmn.js","/_next/static/chunks/05ab0-_008pri.js","/_next/static/chunks/0.f2i~lymd62n.js"],""]
+3:I[97367,["/_next/static/chunks/12jj9s16fumam.js","/_next/static/chunks/0d3shmwh5_nmn.js","/_next/static/chunks/05ab0-_008pri.js","/_next/static/chunks/0.f2i~lymd62n.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"rsc":["$","$1","c",{"children":[["$","div",null,{"className":"container-fluid g-0","children":["$","div",null,{"className":"text-center py-5","children":[["$","svg",null,{"stroke":"currentColor","fill":"none","strokeWidth":"2","viewBox":"0 0 24 24","strokeLinecap":"round","strokeLinejoin":"round","className":"text-primary mb-4","children":["$undefined",[["$","path","0",{"d":"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z","children":[]}]]],"style":{},"height":64,"width":64,"xmlns":"http://www.w3.org/2000/svg"}],["$","h1",null,{"className":"h2 fw-bold mb-3","children":"短信服务"}],["$","p",null,{"className":"text-muted","children":"短信发送功能请在首页使用"}],["$","$L2",null,{"href":"/","className":"btn btn-primary mt-3","children":"返回首页"}]]}]}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"jiCli61b5WBLDHdK4k8jn"}
+5:null

@@ -1,0 +1,11 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/analytics/page": "/analytics",
+  "/contacts/page": "/contacts",
+  "/favicon.ico/route": "/favicon.ico",
+  "/page": "/",
+  "/settings/page": "/settings",
+  "/sms/page": "/sms",
+  "/templates/page": "/templates"
+}
